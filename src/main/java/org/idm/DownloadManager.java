@@ -1,5 +1,6 @@
 package org.idm;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
@@ -9,6 +10,7 @@ import org.idm.config.AppConfig;
 import org.idm.models.FileInfo;
 
 import java.io.File;
+import java.text.DecimalFormat;
 
 public class DownloadManager {
 
@@ -28,7 +30,7 @@ public class DownloadManager {
         String status ="Starting";
         String action="OPEN";
         String path = AppConfig.DOWNLOAD_PATH+ File.separator+filename;
-        FileInfo file = new FileInfo((index+1)+"",filename,url,status,action,path);
+        FileInfo file = new FileInfo((index+1)+"",filename,url,status,action,path,"0");
         this.index = this.index+1;
         DownloadThread thread = new DownloadThread(file,this);
         this.tableView.getItems().add(Integer.parseInt(file.getIndex())-1,file);
@@ -39,6 +41,8 @@ public class DownloadManager {
         System.out.println(file);
         FileInfo fileInfo = this.tableView.getItems().get(Integer.parseInt(file.getIndex())-1);
         fileInfo.setStatus(file.getStatus());
+        DecimalFormat decimalFormat = new DecimalFormat("0.00");
+        fileInfo.setPercentage(decimalFormat.format(Double.parseDouble(file.getPercentage())));
         this.tableView.refresh();
     }
 
@@ -60,7 +64,14 @@ public class DownloadManager {
         status.setCellValueFactory(p->{
             return p.getValue().statusProperty();
         });
-        TableColumn<FileInfo, String> action = (TableColumn<FileInfo, String>)this.tableView.getColumns().get(4);
+        TableColumn<FileInfo, String> percentage = (TableColumn<FileInfo, String>)this.tableView.getColumns().get(4);
+        percentage.setCellValueFactory(p->{
+            SimpleStringProperty simpleStringProperty = new SimpleStringProperty();
+            simpleStringProperty.set(p.getValue().getPercentage()+"%");
+            return simpleStringProperty;
+        });
+        
+        TableColumn<FileInfo, String> action = (TableColumn<FileInfo, String>)this.tableView.getColumns().get(5);
         action.setCellValueFactory(p->{
             return p.getValue().actionProperty();
         });
